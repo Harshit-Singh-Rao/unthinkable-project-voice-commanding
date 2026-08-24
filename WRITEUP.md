@@ -7,18 +7,17 @@ single Python process with no network calls at request time.
 
 ## Frontend
 
-Plain HTML/CSS/JS using the Web Speech API for speech-to-text, with a dark
+Built with **Next.js (React) and Tailwind CSS** using the Web Speech API for speech-to-text, with a dark
 "Jarvis HUD" orb as the voice control (idle breathing pulse, faster pulse while
 listening, brief tightening while processing; `prefers-reduced-motion` falls
-back to a static ring). The client is intentionally thin: it captures the
-transcript, POSTs it, and swaps in the HTML the server returns. A collapsible
+back to a static ring). The client is a modern SPA that captures the
+transcript, POSTs it alongside the current state, and updates the React state with the returned JSON. A collapsible
 trace panel shows how each command was understood (intent, confidence, and the
 extracted slots), which doubles as a debugging aid.
 
 ## Backend
 
-A Python Flask server (`server/app.py`) serves the static frontend and exposes
-a small JSON API. Intent classification (ADD / REMOVE / SEARCH_ITEM /
+A Python Flask app (`api/index.py`) exposed as **Serverless API Functions on Vercel** handles the logic. Intent classification (ADD / REMOVE / SEARCH_ITEM /
 SEARCH_FILTER) uses a TF-IDF + logistic regression model trained offline with
 scikit-learn and exported via skl2onnx, then run through ONNX Runtime. Because
 skl2onnx compiles the *entire* pipeline — tokenization and TF-IDF weighting
@@ -43,21 +42,17 @@ model would get wrong: metric roll-ups (`500 g` + `1 kg` reads back as
 
 ## Hindi, offline
 
-Hindi input is normalised by a static alias table (`server/data/aliases_hi.json`),
+Hindi input is normalised by a static alias table (`api/data/aliases_hi.json`),
 not a translation service. The previous build round-tripped commands and list
 contents through Google Translate on every request — a network call that
 contradicted the "no cloud" claim and added unbounded latency. The table now
 maps Devanagari items, number words, units, and verbs to their canonical
 English tokens and reorders the sentence (Hindi is verb-final; the English-
 trained model expects verb-initial) before the same pipeline runs. UI strings
-are served from a parallel key/value table (`server/data/ui_hi.json`), so
+are served from a parallel key/value table (`api/data/ui_hi.json`), so
 nothing is translated at request time and identical input always renders
 identical output.
 
 ## State
 
-List and purchase-history state is in-memory, scoped per session id, in a
-thread-safe store bounded by an LRU cap. This is deliberate for a demo: it
-needs no database and starts clean. The trade-off — state is ephemeral and does
-not survive a restart, and the server must run as a single process — is
-documented in the README rather than hidden.
+List and purchase-history state is **completely stateless on the server** and is persisted entirely in the browser using `localStorage`. The React frontend passes the current items and history in the JSON payload of every API request. The Python backend processes the command, mutates the list, and returns the new state to the client, which then saves it. This solves the "ephemeral state" serverless limitation, requires no database provisioning, and ensures absolute user privacy.
