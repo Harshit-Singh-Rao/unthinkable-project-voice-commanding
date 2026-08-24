@@ -1,4 +1,16 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": { "includeFiles": "api/**" }
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
