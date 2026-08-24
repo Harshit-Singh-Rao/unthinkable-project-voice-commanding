@@ -1,26 +1,35 @@
 <div align="center">
-  <h1>EchoList</h1>
+  <h1>🛒 EchoList</h1>
   <h3>Voice-Activated Shopping Assistant</h3>
+  <p>
+    <a href="https://unthinkable-project-voice-commandin.vercel.app/">🔴 Live Demo</a> &nbsp;|&nbsp;
+    <a href="#running-locally">⚙️ Run Locally</a> &nbsp;|&nbsp;
+    <a href="#architecture">🏗 Architecture</a>
+  </p>
 </div>
 
 ---
 
 ## Overview
 
-**EchoList** is a voice-activated shopping list manager built for a modern serverless environment. The frontend is built with **Next.js (React) and Tailwind CSS**, providing a sleek UI that responds to your voice commands. The backend runs as **Python Serverless Functions** on Vercel, handling local ONNX intent classification, entity extraction, and metric arithmetic.
+**EchoList** is a voice-activated shopping list manager built for a modern serverless environment. Speak naturally to add, remove, or search for items — in **English or Hindi**.
 
-The application is completely **stateless**. User data (shopping lists and purchase histories) is stored entirely client-side using `localStorage`, ensuring privacy and avoiding any database provisioning, making it perfectly suited for free-tier serverless deployments.
+The frontend is built with **Next.js 14 (React) + Tailwind CSS + Framer Motion**, providing a sleek dark UI with a glowing amber orb that pulses when listening. The backend runs as **Python Serverless Functions** on Vercel, using a compiled **ONNX intent classifier** for on-device ML inference — no LLM, no cloud AI calls.
+
+The app is completely **stateless on the server**. Shopping lists and purchase histories are stored in the browser's `localStorage`, so no database is needed.
 
 ---
 
 ## Features
 
-- **Voice-First UI**: A dark Next.js interface with a glowing orb that reacts to your voice.
-- **English + Hindi**: Hindi commands are normalized to canonical English.
-- **Local ONNX Inference**: Intent classification runs inside the Python backend using a compiled ONNX model.
-- **Metric Engine & Quantity Caps**: Understands unit arithmetic ("add 200g then 1kg = 1.2kg").
-- **Stateless Architecture**: No databases required. The React frontend maintains the state and passes it to the Python API on each request.
-- **Trace Panel**: A collapsible panel shows how each command was understood.
+| Feature | Details |
+|---|---|
+| 🎙️ Voice-first UI | Glowing amber orb with pulse animation while listening |
+| 🌐 English + Hindi | Hindi commands are normalised to canonical English offline |
+| 🤖 Local ONNX Inference | TF-IDF + logistic regression compiled into ONNX, runs in Python |
+| ⚖️ Metric Engine | Understands unit arithmetic: `200g + 1kg = 1.2kg` |
+| 🔒 Stateless & Private | All user data lives in `localStorage` — no server, no DB |
+| 🔍 Trace Panel | Collapsible debug panel shows intent, confidence, and extracted slots |
 
 ---
 
@@ -28,48 +37,75 @@ The application is completely **stateless**. User data (shopping lists and purch
 
 ```mermaid
 graph TD
-    Client["Next.js UI (React)<br/>Client-side State (localStorage)"]
-    Server["Python Serverless API<br/>(/api/command)"]
+    Browser["Next.js UI (React + Framer Motion)<br/>localStorage state"]
+    API["Python Serverless Function<br/>/api/command"]
 
-    Client -- "1. Sends voice text + current state (JSON)" --> Server
-    
+    Browser -- "1. Voice text + current list (JSON)" --> API
+
     subgraph Python Backend
-        ONNX["ONNX Intent Classifier"]
-        Rules["NLP Entity Extraction"]
+        ONNX["ONNX Intent Classifier<br/>(ADD / REMOVE / SEARCH)"]
+        NLP["NLP Entity Extraction<br/>(item, qty, brand, unit)"]
+        Hindi["Hindi Normaliser<br/>(alias table, no translation API)"]
     end
 
-    Server --> ONNX
-    ONNX --> Rules
-    Rules -- "Mutates state" --> Server
-
-    Server -- "2. Returns updated state (JSON)" --> Client
-    Client -- "3. Saves to localStorage & Rerenders" --> Client
+    API --> Hindi --> ONNX --> NLP
+    NLP -- "Updated state" --> API
+    API -- "2. Returns new list (JSON)" --> Browser
+    Browser -- "3. Saves to localStorage & rerenders" --> Browser
 ```
 
 ---
 
 ## Running Locally
 
-Requirements: Node.js, Python 3.10+
+**Requirements:** Node.js 18+, Python 3.10+
 
-1. Install dependencies:
 ```bash
+# 1. Install frontend dependencies
 npm install
+
+# 2. Install backend dependencies
 pip install -r requirements.txt
+
+# 3. Run with Vercel CLI (handles both Next.js + Python API together)
+npx vercel dev
 ```
 
-2. Run the Next.js development server (which automatically proxies `/api` calls to the local Python backend via `next.config.mjs`):
-```bash
-npm run dev
-# OR simply run npx vercel dev
-```
+> 💡 `npx vercel dev` is the recommended way to run locally as it replicates the Vercel routing (Next.js on port 3000, Python API proxied automatically).
 
 ---
 
 ## Vercel Deployment
 
-This repository is ready for a 1-click Vercel deployment:
-1. Connect your GitHub repository to Vercel.
-2. The framework preset should be **Next.js**.
-3. Vercel will automatically detect `vercel.json` and install Python dependencies from `requirements.txt` to run the `/api` folder as serverless functions.
-4. **No database setup needed.**
+This repo is ready for **1-click Vercel deployment**:
+
+1. Connect your GitHub repo to [Vercel](https://vercel.com/new).
+2. Set **Framework Preset** → **Next.js**.
+3. Leave **Root Directory** as `./`.
+4. Click **Deploy**.
+
+Vercel auto-detects `vercel.json` and installs `requirements.txt` for the Python serverless functions. **No database or environment variables needed.**
+
+---
+
+## Voice Commands
+
+Try saying:
+- `"Add 2 apples"` → adds 2 apples
+- `"Add 500g butter"` → adds with metric unit
+- `"Remove milk"` → removes milk from the list
+- `"Search for organic eggs"` → searches the catalog
+- Hindi: `"दूध जोड़ो"` → adds milk
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 14, React, Tailwind CSS, Framer Motion |
+| Speech | Web Speech API (browser-native) |
+| Backend | Python 3.10+, Flask, ONNX Runtime |
+| ML Model | TF-IDF + Logistic Regression → skl2onnx |
+| Hosting | Vercel (Next.js + Python Serverless) |
+| State | Browser `localStorage` (no database) |
