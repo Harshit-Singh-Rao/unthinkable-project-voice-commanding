@@ -8,9 +8,9 @@ import { useSpeech } from '@/hooks/useSpeech';
 
 export default function Home() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<Record<string, unknown>[]>([]);
   const [messages, setMessages] = useState<{type: string, text: string}[]>([]);
-  const [trace, setTrace] = useState<any[]>([]);
+  const [trace, setTrace] = useState<Record<string, unknown>[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Load state from local storage on mount

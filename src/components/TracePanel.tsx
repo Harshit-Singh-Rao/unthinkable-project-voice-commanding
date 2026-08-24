@@ -10,7 +10,7 @@ interface TraceItem {
   quantity?: number;
   unit?: string;
   brand?: string;
-  price?: any;
+  price?: unknown;
   hindi: boolean;
   normalized?: string;
 }
