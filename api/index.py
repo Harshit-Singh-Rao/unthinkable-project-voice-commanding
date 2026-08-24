@@ -4,6 +4,14 @@ This API is now completely stateless and designed for Vercel Serverless Function
 All list and history state is managed by the client and passed in on each request.
 """
 import os
+import sys
+
+# Vercel builds this file as the sole Serverless Function in /api (helper
+# modules and the data/ dictionaries live in ../lib so they are NOT each
+# turned into their own function). Put ../lib on the path so the imports
+# below resolve the same way they do in tests and under `vercel dev`.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
