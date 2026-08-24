@@ -27,32 +27,35 @@ export default function Home() {
     localStorage.setItem('shopping_history', JSON.stringify(history));
   }, [items, history]);
 
+  // Auto-clear messages after 4 seconds
+  useEffect(() => {
+    if (messages.length > 0) {
+      const timer = setTimeout(() => setMessages([]), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [messages]);
+
   const handleCommand = async (text: string) => {
     setIsProcessing(true);
     try {
       const res = await fetch('/api/command', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text,
-          lang: 'en',
-          items,
-          history
-        }),
+        body: JSON.stringify({ text, lang: 'en', items, history }),
       });
 
-      if (!res.ok) throw new Error('API Error');
-      
+      if (!res.ok) throw new Error(`API Error ${res.status}`);
+
       const data = await res.json();
-      
-      if (data.items) setItems(data.items);
-      if (data.history) setHistory(data.history);
+
+      if (data.items !== undefined) setItems(data.items);
+      if (data.history !== undefined) setHistory(data.history);
       if (data.messages) setMessages(data.messages);
       if (data.trace) setTrace(data.trace);
-      
+
     } catch (err) {
       console.error(err);
-      setMessages([{ type: 'error', text: 'Network error or backend failure.' }]);
+      setMessages([{ type: 'error', text: 'Could not reach the backend. Please try again.' }]);
     } finally {
       setIsProcessing(false);
     }
@@ -63,30 +66,36 @@ export default function Home() {
   });
 
   const toggleListening = () => {
+    if (isProcessing) return;
     if (isListening) stopListening();
     else startListening();
   };
 
   return (
     <main className="min-h-screen bg-black text-gray-100 flex flex-col items-center py-10 px-4">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-amber-500 tracking-tight">EchoList</h1>
-        <p className="text-gray-500 mt-2">Voice-Activated Shopping Assistant</p>
+      <div className="text-center mb-10">
+        <h1 className="text-5xl font-bold text-amber-500 tracking-tight">EchoList</h1>
+        <p className="text-gray-500 mt-2 text-sm">Voice-Activated Shopping Assistant</p>
       </div>
 
-      <div className="mb-12">
-        <VoiceOrb 
-          isListening={isListening || isProcessing} 
-          onClick={toggleListening} 
-          supported={supported} 
+      <div className="mb-10">
+        <VoiceOrb
+          isListening={isListening}
+          isProcessing={isProcessing}
+          onClick={toggleListening}
+          supported={supported}
         />
       </div>
 
-      <div className="w-full max-w-md mb-6">
+      <div className="w-full max-w-md mb-6 min-h-[40px]">
         {messages.map((m, i) => (
-          <div 
-            key={i} 
-            className={`p-3 rounded mb-2 text-sm text-center ${m.type === 'error' ? 'bg-red-950 text-red-400 border border-red-900' : 'bg-green-950 text-green-400 border border-green-900'}`}
+          <div
+            key={i}
+            className={`p-3 rounded-lg mb-2 text-sm text-center border ${
+              m.type === 'error'
+                ? 'bg-red-950 text-red-400 border-red-900'
+                : 'bg-green-950 text-green-400 border-green-900'
+            }`}
           >
             {m.text}
           </div>
@@ -94,7 +103,7 @@ export default function Home() {
       </div>
 
       <ShoppingList items={items} />
-      
+
       {trace.length > 0 && <TracePanel traces={trace} />}
     </main>
   );
