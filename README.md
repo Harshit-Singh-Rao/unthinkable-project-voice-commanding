@@ -1,111 +1,933 @@
-<div align="center">
-  <h1>🛒 EchoList</h1>
-  <h3>Voice-Activated Shopping Assistant</h3>
-  <p>
-    <a href="https://unthinkable-project-voice-commandin.vercel.app/">🔴 Live Demo</a> &nbsp;|&nbsp;
-    <a href="#running-locally">⚙️ Run Locally</a> &nbsp;|&nbsp;
-    <a href="#architecture">🏗 Architecture</a>
-  </p>
-</div>
+# 🛒 EchoList
+
+### Voice-Activated Shopping Assistant
+
+EchoList is a voice-activated shopping list manager that allows users to manage their shopping lists using natural voice commands.
+
+Instead of manually typing items, users can simply speak commands such as:
+
+> "Add 2 apples"
+
+> "Remove milk"
+
+> "Search for organic eggs"
+
+EchoList processes these commands using browser-based speech recognition, a Python serverless backend, and a lightweight ONNX machine-learning model.
+
+🌐 **Live Demo:** https://unthinkable-project-voice-commandin.vercel.app/
+
+💻 **GitHub:** https://github.com/Harshit-Singh-Rao/unthinkable-project-voice-commanding
 
 ---
 
-## Overview
+## ✨ Features
 
-**EchoList** is a voice-activated shopping list manager built for a modern serverless environment. Speak naturally to add, remove, or search for items — in **English or Hindi**.
-
-The frontend is built with **Next.js 14 (React) + Tailwind CSS + Framer Motion**, providing a sleek dark UI with a glowing amber orb that pulses when listening. The backend runs as **Python Serverless Functions** on Vercel, using a compiled **ONNX intent classifier** for on-device ML inference — no LLM, no cloud AI calls.
-
-The app is completely **stateless on the server**. Shopping lists and purchase histories are stored in the browser's `localStorage`, so no database is needed.
-
----
-
-## Features
-
-| Feature | Details |
+| Feature | Description |
 |---|---|
-| 🎙️ Voice-first UI | Glowing amber orb with pulse animation while listening |
-| 🌐 English + Hindi | Hindi commands are normalised to canonical English offline |
-| 🤖 Local ONNX Inference | TF-IDF + logistic regression compiled into ONNX, runs in Python |
-| ⚖️ Metric Engine | Understands unit arithmetic: `200g + 1kg = 1.2kg` |
-| 🔒 Stateless & Private | All user data lives in `localStorage` — no server, no DB |
-| 🔍 Trace Panel | Collapsible debug panel shows intent, confidence, and extracted slots |
+| 🎙️ **Voice-First UI** | Manage your shopping list using voice commands |
+| 🌐 **English + Hindi** | Supports English and Hindi commands |
+| 🤖 **ONNX ML Inference** | Uses a lightweight intent-classification model |
+| 🧠 **Intent Detection** | Detects `ADD`, `REMOVE`, and `SEARCH` commands |
+| 🔎 **Entity Extraction** | Extracts items, quantities, brands, and units |
+| ⚖️ **Metric Engine** | Supports metric quantity arithmetic |
+| 🔒 **Stateless Backend** | No database is required |
+| 💾 **Local Storage** | Shopping data is stored in browser `localStorage` |
+| 🔍 **Trace Panel** | Displays intent, confidence, and extracted information |
+| ☁️ **Serverless Deployment** | Designed to run on Vercel |
 
 ---
 
-## Architecture
+# 🏗️ Architecture
 
 ```mermaid
-graph TD
-    Browser["Next.js UI (React + Framer Motion)<br/>localStorage state"]
-    API["Python Serverless Function<br/>/api/command"]
+flowchart TD
 
-    Browser -- "1. Voice text + current list (JSON)" --> API
+    USER["👤 User"]
 
-    subgraph Python Backend
-        ONNX["ONNX Intent Classifier<br/>(ADD / REMOVE / SEARCH)"]
-        NLP["NLP Entity Extraction<br/>(item, qty, brand, unit)"]
-        Hindi["Hindi Normaliser<br/>(alias table, no translation API)"]
+    subgraph FRONTEND["🌐 Next.js Frontend"]
+        UI["🎨 React UI"]
+        SPEECH["🎙️ Web Speech API"]
+        TEXT["📝 Recognized Text"]
+        STORAGE[("💾 localStorage")]
     end
 
-    API --> Hindi --> ONNX --> NLP
-    NLP -- "Updated state" --> API
-    API -- "2. Returns new list (JSON)" --> Browser
-    Browser -- "3. Saves to localStorage & rerenders" --> Browser
+    subgraph BACKEND["🐍 Python Serverless Backend"]
+        API["/api/command"]
+        HINDI["🌐 Hindi Normalizer"]
+        ONNX["🤖 ONNX Intent Classifier"]
+        NLP["🔎 NLP Entity Extraction"]
+        METRIC["⚖️ Metric Engine"]
+    end
+
+    USER -->|"Voice Command"| SPEECH
+    SPEECH -->|"Speech → Text"| TEXT
+    TEXT --> UI
+
+    UI -->|"Command + Current List"| API
+
+    API --> HINDI
+    HINDI --> ONNX
+    ONNX --> NLP
+    NLP --> METRIC
+
+    METRIC -->|"Updated State"| API
+
+    API -->|"JSON Response"| UI
+
+    UI -->|"Persist List"| STORAGE
+    STORAGE -->|"Restore List"| UI
 ```
 
 ---
 
-## Running Locally
+# 🔄 Command Processing Flow
 
-**Requirements:** Node.js 18+, Python 3.10+
+The complete lifecycle of a voice command looks like this:
 
-```bash
-# 1. Install frontend dependencies
-npm install
+```mermaid
+flowchart LR
 
-# 2. Install backend dependencies
-pip install -r requirements.txt
+    A["🎙️ User speaks<br/>Add 2 apples"]
+    B["🌐 Web Speech API"]
+    C["📝 Speech → Text<br/>Add 2 apples"]
+    D["📡 POST /api/command"]
+    E["🌐 Hindi Normalization"]
+    F["🤖 ONNX Intent Classifier"]
+    G{"Intent"}
 
-# 3. Run with Vercel CLI (handles both Next.js + Python API together)
-npx vercel dev
+    H["➕ ADD"]
+    I["➖ REMOVE"]
+    J["🔍 SEARCH"]
+
+    K["🔎 Entity Extraction"]
+    L["📦 Item"]
+    M["🔢 Quantity"]
+    N["⚖️ Unit"]
+    O["🏷️ Brand"]
+
+    P["🧮 Metric Engine"]
+    Q["🛒 Update Shopping List"]
+    R["📤 JSON Response"]
+    S["💾 Save to localStorage"]
+    T["🎨 Update UI"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+
+    G --> H
+    G --> I
+    G --> J
+
+    H --> K
+    I --> K
+    J --> K
+
+    K --> L
+    K --> M
+    K --> N
+    K --> O
+
+    L --> P
+    M --> P
+    N --> P
+
+    P --> Q
+    Q --> R
+    R --> S
+    S --> T
 ```
 
-> 💡 `npx vercel dev` is the recommended way to run locally as it replicates the Vercel routing (Next.js on port 3000, Python API proxied automatically).
+---
+
+# 🧠 Machine Learning Architecture
+
+EchoList uses a lightweight machine-learning approach instead of relying on an external LLM or cloud AI API.
+
+The intent classifier is based on:
+
+- TF-IDF vectorization
+- Logistic Regression
+- `skl2onnx`
+- ONNX Runtime
+
+```mermaid
+flowchart TD
+
+    DATA["📚 Training Commands"]
+    TFIDF["TF-IDF<br/>Vectorization"]
+    LR["Logistic Regression"]
+    CONVERT["ONNX Conversion<br/>skl2onnx"]
+    MODEL["📦 ONNX Model"]
+    RUNTIME["⚡ ONNX Runtime"]
+    COMMAND["📝 Incoming Command"]
+    PREDICTION["🎯 Intent Prediction"]
+    CONFIDENCE["📊 Confidence Score"]
+
+    DATA --> TFIDF
+    TFIDF --> LR
+    LR --> CONVERT
+    CONVERT --> MODEL
+    MODEL --> RUNTIME
+
+    COMMAND --> RUNTIME
+    RUNTIME --> PREDICTION
+    PREDICTION --> CONFIDENCE
+```
 
 ---
 
-## Vercel Deployment
+# 🎯 Supported Intents
 
-This repo is ready for **1-click Vercel deployment**:
+## ➕ ADD
 
-1. Connect your GitHub repo to [Vercel](https://vercel.com/new).
-2. Set **Framework Preset** → **Next.js**.
-3. Leave **Root Directory** as `./`.
-4. Click **Deploy**.
+Adds an item to the shopping list.
 
-Vercel auto-detects `vercel.json` and installs `requirements.txt` for the Python serverless functions. **No database or environment variables needed.**
+Example:
 
----
+```text
+Add 2 apples
+```
 
-## Voice Commands
+Result:
 
-Try saying:
-- `"Add 2 apples"` → adds 2 apples
-- `"Add 500g butter"` → adds with metric unit
-- `"Remove milk"` → removes milk from the list
-- `"Search for organic eggs"` → searches the catalog
-- Hindi: `"दूध जोड़ो"` → adds milk
+```text
+Item: apples
+Quantity: 2
+Intent: ADD
+```
 
 ---
 
-## Tech Stack
+## ➖ REMOVE
+
+Removes an item from the shopping list.
+
+Example:
+
+```text
+Remove milk
+```
+
+Result:
+
+```text
+Item: milk
+Intent: REMOVE
+```
+
+---
+
+## 🔍 SEARCH
+
+Searches for an item.
+
+Example:
+
+```text
+Search for organic eggs
+```
+
+Result:
+
+```text
+Item: organic eggs
+Intent: SEARCH
+```
+
+---
+
+# 🌐 Multilingual Support
+
+EchoList supports English and Hindi voice commands.
+
+Hindi commands are normalized using an internal alias/normalization system.
+
+Example:
+
+```text
+दूध जोड़ो
+```
+
+is interpreted as:
+
+```text
+Add milk
+```
+
+The normalization process does not require an external translation API.
+
+```mermaid
+flowchart LR
+
+    A["🇮🇳 Hindi Command"]
+    B["Hindi Normalizer"]
+    C["Canonical Command"]
+    D["Intent Classifier"]
+    E["Shopping Action"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+```
+
+---
+
+# ⚖️ Metric Engine
+
+EchoList supports metric quantities and unit arithmetic.
+
+For example:
+
+```text
+Add 500g butter
+```
+
+can be interpreted as:
+
+```text
+Item: butter
+Quantity: 500
+Unit: g
+```
+
+The metric engine can also handle compatible units.
+
+Example:
+
+```text
+200g + 1kg
+```
+
+becomes:
+
+```text
+1.2kg
+```
+
+---
+
+# 🎙️ Example Voice Commands
+
+## Add Items
+
+```text
+"Add 2 apples"
+```
+
+```text
+"Add 500g butter"
+```
+
+```text
+"Add 1kg rice"
+```
+
+## Remove Items
+
+```text
+"Remove milk"
+```
+
+```text
+"Remove apples"
+```
+
+## Search
+
+```text
+"Search for organic eggs"
+```
+
+## Hindi
+
+```text
+"दूध जोड़ो"
+```
+
+---
+
+# 🧩 System Sequence
+
+```mermaid
+sequenceDiagram
+
+    actor User
+
+    participant Browser as Browser
+    participant Speech as Web Speech API
+    participant API as Python API
+    participant Hindi as Hindi Normalizer
+    participant ML as ONNX Classifier
+    participant NLP as Entity Extraction
+    participant Storage as localStorage
+
+    User->>Browser: Tap microphone
+    Browser->>Speech: Start recognition
+
+    User->>Speech: "Add 2 apples"
+    Speech-->>Browser: "Add 2 apples"
+
+    Browser->>API: Send command + current list
+
+    API->>Hindi: Normalize command
+    Hindi-->>API: Canonical command
+
+    API->>ML: Classify intent
+    ML-->>API: ADD + confidence
+
+    API->>NLP: Extract entities
+    NLP-->>API: apples + quantity 2
+
+    API-->>Browser: Updated list + trace data
+
+    Browser->>Storage: Save shopping list
+    Storage-->>Browser: Persisted state
+
+    Browser-->>User: Display updated list
+```
+
+---
+
+# 💻 Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 14, React, Tailwind CSS, Framer Motion |
-| Speech | Web Speech API (browser-native) |
-| Backend | Python 3.10+, Flask, ONNX Runtime |
-| ML Model | TF-IDF + Logistic Regression → skl2onnx |
-| Hosting | Vercel (Next.js + Python Serverless) |
-| State | Browser `localStorage` (no database) |
+| **Frontend** | Next.js 14, React |
+| **Styling** | Tailwind CSS |
+| **Animation** | Framer Motion |
+| **Speech Recognition** | Web Speech API |
+| **Backend** | Python 3.10+, Flask |
+| **ML Runtime** | ONNX Runtime |
+| **ML Model** | TF-IDF + Logistic Regression |
+| **ML Conversion** | `skl2onnx` |
+| **Hosting** | Vercel |
+| **State Management** | Browser `localStorage` |
+
+---
+
+# 📁 Project Structure
+
+```text
+unthinkable-project-voice-commanding/
+│
+├── api/
+│   └── command/
+│       └── ...
+│
+├── src/
+│   └── ...
+│
+├── tests/
+│   └── ...
+│
+├── train/
+│   └── ...
+│
+├── .eslintrc.json
+├── .gitignore
+├── Dockerfile
+├── README.md
+├── WRITEUP.md
+├── next-env.d.ts
+├── next.config.mjs
+├── package.json
+├── postcss.config.mjs
+├── requirements.txt
+├── smoke_test.py
+├── tailwind.config.ts
+├── tsconfig.json
+└── vercel.json
+```
+
+---
+
+# ⚙️ Running Locally
+
+## Prerequisites
+
+Make sure the following are installed:
+
+- Node.js 18+
+- Python 3.10+
+- npm
+- pip
+- Vercel CLI
+
+---
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/Harshit-Singh-Rao/unthinkable-project-voice-commanding.git
+
+cd unthinkable-project-voice-commanding
+```
+
+---
+
+## 2. Install Frontend Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## 3. Install Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Start the Development Server
+
+The recommended development command is:
+
+```bash
+npx vercel dev
+```
+
+This runs the Next.js frontend and Python serverless API together using Vercel's local development environment.
+
+---
+
+# ☁️ Deployment
+
+EchoList is configured for deployment on Vercel.
+
+## Deploy Using Vercel
+
+1. Push the repository to GitHub.
+2. Open Vercel.
+3. Import the GitHub repository.
+4. Select **Next.js** as the framework.
+5. Keep the root directory as:
+
+```text
+./
+```
+
+6. Click **Deploy**.
+
+Vercel automatically detects the project's configuration and Python dependencies.
+
+No database or environment variables are required by the current project.
+
+---
+
+# 🔒 Privacy & Data Architecture
+
+EchoList is designed around a stateless backend.
+
+The backend does not maintain a persistent shopping-list database.
+
+Instead, shopping-list state is stored in the user's browser.
+
+```mermaid
+flowchart TD
+
+    USER["👤 User"]
+    BROWSER["🌐 Browser"]
+    LOCAL[("💾 localStorage")]
+    API["🐍 Serverless API"]
+
+    USER --> BROWSER
+
+    BROWSER -->|"Command + List"| API
+    API -->|"Updated List"| BROWSER
+
+    BROWSER -->|"Persist"| LOCAL
+    LOCAL -->|"Restore"| BROWSER
+```
+
+### Benefits
+
+- No database required
+- Simple deployment
+- Minimal backend infrastructure
+- User data remains in browser storage
+- Stateless API architecture
+
+---
+
+# 🔍 Trace Panel
+
+EchoList includes a trace/debug panel that helps visualize how a voice command was interpreted.
+
+It can expose information such as:
+
+```text
+Intent: ADD
+
+Confidence: 0.XX
+
+Item: apples
+
+Quantity: 2
+
+Unit: none
+```
+
+This makes the ML pipeline easier to understand and debug.
+
+---
+
+# 🧪 Testing
+
+The project contains a dedicated testing directory:
+
+```text
+tests/
+```
+
+It also includes:
+
+```text
+smoke_test.py
+```
+
+You can run the smoke test with:
+
+```bash
+python smoke_test.py
+```
+
+For full application testing:
+
+```bash
+npx vercel dev
+```
+
+Then open the local application and test voice commands through the browser.
+
+---
+
+# 🐳 Docker
+
+The repository also contains a `Dockerfile`.
+
+Build the Docker image:
+
+```bash
+docker build -t echolist .
+```
+
+Run the container:
+
+```bash
+docker run -p 3000:3000 echolist
+```
+
+---
+
+# 📡 API
+
+The primary backend endpoint is:
+
+```text
+POST /api/command
+```
+
+The frontend sends the recognized command and current shopping-list state to the backend.
+
+A conceptual request looks like:
+
+```json
+{
+  "command": "Add 2 apples",
+  "list": []
+}
+```
+
+The backend processes the command and returns the updated state.
+
+A conceptual response may look like:
+
+```json
+{
+  "intent": "ADD",
+  "confidence": 0.95,
+  "item": "apples",
+  "quantity": 2,
+  "unit": null,
+  "list": [
+    {
+      "item": "apples",
+      "quantity": 2
+    }
+  ]
+}
+```
+
+> Note: The exact request and response schema should be treated according to the current implementation in `/api/command`.
+
+---
+
+# 🎨 User Experience
+
+The application uses a voice-first interface.
+
+The primary interaction is a glowing microphone/orb interface that indicates when the application is listening.
+
+The user flow is intentionally simple:
+
+```text
+Open EchoList
+      ↓
+Tap to Speak
+      ↓
+Say a Command
+      ↓
+Command Recognized
+      ↓
+Intent Detected
+      ↓
+Entity Extracted
+      ↓
+Shopping List Updated
+```
+
+---
+
+# 🧠 Design Philosophy
+
+## Voice First
+
+The application is designed around natural voice interaction rather than traditional text input.
+
+## Lightweight Machine Learning
+
+EchoList uses a compact ML classifier instead of depending on an external LLM.
+
+This helps reduce:
+
+- Infrastructure complexity
+- External API dependencies
+- AI inference costs
+- Network dependency
+- Data sent to third-party AI services
+
+## Stateless Backend
+
+The backend processes commands without maintaining a user database.
+
+## Local Persistence
+
+The shopping list is persisted through browser `localStorage`.
+
+## Transparent AI
+
+The trace panel provides insight into the model's interpretation instead of hiding the entire processing pipeline.
+
+---
+
+# 🚧 Current Limitations
+
+### Browser Speech Recognition
+
+Voice recognition depends on browser support for the Web Speech API.
+
+### Limited Intent Set
+
+The current classifier primarily handles:
+
+```text
+ADD
+REMOVE
+SEARCH
+```
+
+More complex conversational commands would require additional intent classes and training data.
+
+### Browser-Based Storage
+
+Because the shopping list is stored in `localStorage`:
+
+- Data is tied to the browser/device
+- Clearing browser storage can remove the list
+- Lists are not automatically synchronized between devices
+
+### Stateless Backend
+
+There is currently no persistent user account or cloud database.
+
+---
+
+# 🔮 Future Improvements
+
+- [ ] Add `UPDATE` intent
+- [ ] Add `CLEAR` intent
+- [ ] Add `CHECK` intent
+- [ ] Improve natural-language quantity parsing
+- [ ] Add more Indian languages
+- [ ] Add user authentication
+- [ ] Add cloud synchronization
+- [ ] Add cross-device shopping lists
+- [ ] Add shared/family shopping lists
+- [ ] Improve entity recognition
+- [ ] Expand the training dataset
+- [ ] Add automated ML evaluation
+- [ ] Add product catalog integration
+- [ ] Add barcode scanning
+- [ ] Add shopping history analytics
+- [ ] Add personalized recommendations
+- [ ] Add Progressive Web App support
+- [ ] Build a native mobile application
+- [ ] Improve offline support
+
+---
+
+# 📊 Complete Application Overview
+
+```mermaid
+flowchart TB
+
+    USER["👤 USER"]
+
+    subgraph CLIENT["CLIENT"]
+        MIC["🎙️ Microphone"]
+        WEB_SPEECH["Web Speech API"]
+        NEXT["Next.js + React"]
+        UI["EchoList UI"]
+        LOCAL["💾 localStorage"]
+    end
+
+    subgraph SERVER["SERVERLESS BACKEND"]
+        ROUTE["/api/command"]
+        NORMALIZER["Hindi Normalizer"]
+        CLASSIFIER["ONNX Intent Classifier"]
+        EXTRACTOR["Entity Extractor"]
+        METRIC["Metric Engine"]
+    end
+
+    subgraph ML["MACHINE LEARNING"]
+        TFIDF["TF-IDF"]
+        LOGREG["Logistic Regression"]
+        ONNXMODEL["ONNX Model"]
+    end
+
+    USER --> MIC
+    MIC --> WEB_SPEECH
+    WEB_SPEECH --> NEXT
+    NEXT --> UI
+
+    UI --> ROUTE
+
+    ROUTE --> NORMALIZER
+    NORMALIZER --> CLASSIFIER
+    CLASSIFIER --> EXTRACTOR
+    EXTRACTOR --> METRIC
+
+    METRIC --> ROUTE
+    ROUTE --> UI
+
+    UI --> LOCAL
+    LOCAL --> UI
+
+    TFIDF --> LOGREG
+    LOGREG --> ONNXMODEL
+    ONNXMODEL --> CLASSIFIER
+```
+
+---
+
+# 🎯 Example User Journey
+
+```mermaid
+journey
+    title EchoList Shopping Journey
+
+    section Start
+      Open EchoList: 5: User
+      Tap microphone: 5: User
+
+    section Add Items
+      Say "Add 2 apples": 5: User
+      Detect ADD intent: 5: System
+      Extract apples + quantity: 5: System
+      Add apples to list: 5: System
+
+    section More Items
+      Say "Add 500g butter": 5: User
+      Extract metric quantity: 5: System
+      Add butter to list: 5: System
+
+    section Remove
+      Say "Remove milk": 5: User
+      Detect REMOVE intent: 5: System
+      Remove milk: 5: System
+
+    section Finish
+      Review shopping list: 5: User
+      Save list locally: 5: System
+```
+
+---
+
+# 📌 Project Highlights
+
+EchoList demonstrates the integration of several technologies and concepts:
+
+- 🎙️ Speech Recognition
+- 🧠 Natural Language Processing
+- 🤖 Machine Learning
+- 📦 ONNX Model Deployment
+- 🌐 Multilingual Command Processing
+- ⚖️ Metric Arithmetic
+- ⚛️ React / Next.js
+- 🐍 Python
+- ☁️ Serverless Architecture
+- 💾 Browser Storage
+- 🐳 Docker
+- 🚀 Vercel Deployment
+
+---
+
+# 👨‍💻 Author
+
+## Harshit Singh Rao
+
+GitHub:
+
+https://github.com/Harshit-Singh-Rao
+
+Project Repository:
+
+https://github.com/Harshit-Singh-Rao/unthinkable-project-voice-commanding
+
+---
+
+# 🌐 Links
+
+### Live Demo
+
+https://unthinkable-project-voice-commandin.vercel.app/
+
+### Source Code
+
+https://github.com/Harshit-Singh-Rao/unthinkable-project-voice-commanding
+
+---
+
+# ⭐ Support
+
+If you find EchoList useful or interesting:
+
+- ⭐ Star the repository
+- 🐛 Report bugs
+- 💡 Suggest new features
+- 🔧 Submit pull requests
+- 📢 Share the project
+
+---
+
+# 🛒 EchoList in One Sentence
+
+> **EchoList transforms natural voice commands into actionable shopping-list operations using browser speech recognition, lightweight ONNX machine learning, multilingual normalization, metric processing, and a serverless architecture.**
