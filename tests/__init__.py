@@ -1,4 +1,4 @@
-"""Test suite for F.A.B.U.L.I.N.U.S.
+"""Test suite for EchoList.
 
 Uses stdlib `unittest` rather than pytest, so there is no test framework to
 install. pytest discovers and runs `unittest.TestCase` classes natively, so

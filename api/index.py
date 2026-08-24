@@ -1,4 +1,4 @@
-"""F.A.B.U.L.I.N.U.S. - HTTP layer (Serverless API).
+"""EchoList - HTTP layer (Serverless API).
 
 This API is now completely stateless and designed for Vercel Serverless Functions.
 All list and history state is managed by the client and passed in on each request.

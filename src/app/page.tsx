@@ -70,7 +70,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-gray-100 flex flex-col items-center py-10 px-4">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-amber-500 tracking-tight">F.A.B.U.L.I.N.U.S.</h1>
+        <h1 className="text-4xl font-bold text-amber-500 tracking-tight">EchoList</h1>
         <p className="text-gray-500 mt-2">Voice-Activated Shopping Assistant</p>
       </div>
 
