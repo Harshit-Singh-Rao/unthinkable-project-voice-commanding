@@ -30,15 +30,14 @@ export function useSpeech({ onResult, lang = 'en-US' }: SpeechOptions) {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = false;
     recognition.lang = lang === 'hi' ? 'hi-IN' : 'en-US';
 
     recognition.onresult = (event: any) => {
-      const text = event.results[0][0].transcript;
-      // Always call the latest callback without needing it as a dep
+      const text = event.results[event.results.length - 1][0].transcript;
       onResultRef.current(text);
-      setIsListening(false);
+      // Do not stop listening automatically — let the user tap to stop!
     };
 
     recognition.onerror = (event: any) => {
