@@ -410,42 +410,6 @@ sequenceDiagram
 
 ---
 
-# 📁 Project Structure
-
-```text
-unthinkable-project-voice-commanding/
-│
-├── api/
-│   └── command/
-│       └── ...
-│
-├── src/
-│   └── ...
-│
-├── tests/
-│   └── ...
-│
-├── train/
-│   └── ...
-│
-├── .eslintrc.json
-├── .gitignore
-├── Dockerfile
-├── README.md
-├── WRITEUP.md
-├── next-env.d.ts
-├── next.config.mjs
-├── package.json
-├── postcss.config.mjs
-├── requirements.txt
-├── smoke_test.py
-├── tailwind.config.ts
-├── tsconfig.json
-└── vercel.json
-```
-
----
-
 # ⚙️ Running Locally
 
 ## Prerequisites
@@ -609,24 +573,6 @@ Then open the local application and test voice commands through the browser.
 
 ---
 
-# 🐳 Docker
-
-The repository also contains a `Dockerfile`.
-
-Build the Docker image:
-
-```bash
-docker build -t echolist .
-```
-
-Run the container:
-
-```bash
-docker run -p 3000:3000 echolist
-```
-
----
-
 # 📡 API
 
 The primary backend endpoint is:
@@ -760,29 +706,6 @@ There is currently no persistent user account or cloud database.
 
 ---
 
-# 🔮 Future Improvements
-
-- [ ] Add `UPDATE` intent
-- [ ] Add `CLEAR` intent
-- [ ] Add `CHECK` intent
-- [ ] Improve natural-language quantity parsing
-- [ ] Add more Indian languages
-- [ ] Add user authentication
-- [ ] Add cloud synchronization
-- [ ] Add cross-device shopping lists
-- [ ] Add shared/family shopping lists
-- [ ] Improve entity recognition
-- [ ] Expand the training dataset
-- [ ] Add automated ML evaluation
-- [ ] Add product catalog integration
-- [ ] Add barcode scanning
-- [ ] Add shopping history analytics
-- [ ] Add personalized recommendations
-- [ ] Add Progressive Web App support
-- [ ] Build a native mobile application
-- [ ] Improve offline support
-
----
 
 # 📊 Complete Application Overview
 
@@ -904,29 +827,6 @@ https://github.com/Harshit-Singh-Rao/unthinkable-project-voice-commanding
 
 ---
 
-# 🌐 Links
-
-### Live Demo
-
-https://unthinkable-project-voice-commandin.vercel.app/
-
-### Source Code
-
-https://github.com/Harshit-Singh-Rao/unthinkable-project-voice-commanding
-
----
-
-# ⭐ Support
-
-If you find EchoList useful or interesting:
-
-- ⭐ Star the repository
-- 🐛 Report bugs
-- 💡 Suggest new features
-- 🔧 Submit pull requests
-- 📢 Share the project
-
----
 
 # 🛒 EchoList in One Sentence
 
